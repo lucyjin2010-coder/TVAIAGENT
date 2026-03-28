@@ -142,7 +142,6 @@ async def tradingview_webhook(request: Request):
             content={"ok": False, "error": "Invalid JSON"}
         )
 
-    # 简单校验，避免别人乱打你的接口
     if data.get("secret") != SECRET:
         return JSONResponse(
             status_code=401,
@@ -165,7 +164,22 @@ async def tradingview_webhook(request: Request):
         "raw": data,
     }
 
+    # ✅ 注意：下面全部要缩进在函数里面（4个空格）
+
     EVENTS.append(event)
+
+    msg = f"""
+📊 Signal Alert
+
+Symbol: {event['symbol']}
+Event: {event['event']}
+Price: {event['close']}
+
+Score: {analysis['score']}
+Rating: {analysis['rating']}
+"""
+
+    send_telegram(msg)
 
     return {
         "ok": True,
@@ -173,7 +187,6 @@ async def tradingview_webhook(request: Request):
         "symbol": event["symbol"],
         "analysis": analysis,
     }
-
 def send_telegram(message: str):
     token = os.getenv("TELEGRAM_BOT_TOKEN")
     chat_id = os.getenv("TELEGRAM_CHAT_ID")
