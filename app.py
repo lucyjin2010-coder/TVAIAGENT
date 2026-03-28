@@ -3,6 +3,7 @@ from fastapi.responses import JSONResponse, HTMLResponse
 from datetime import datetime
 import json
 import os
+import requests
 
 app = FastAPI()
 
@@ -172,3 +173,17 @@ async def tradingview_webhook(request: Request):
         "symbol": event["symbol"],
         "analysis": analysis,
     }
+
+def send_telegram(message: str):
+    token = os.getenv("TELEGRAM_BOT_TOKEN")
+    chat_id = os.getenv("TELEGRAM_CHAT_ID")
+
+    if not token or not chat_id:
+        return
+
+    url = f"https://api.telegram.org/bot{token}/sendMessage"
+
+    requests.post(url, json={
+        "chat_id": chat_id,
+        "text": message
+    })
